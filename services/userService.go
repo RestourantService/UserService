@@ -1,17 +1,16 @@
 package services
 
 import (
-	userPb "userService/genproto/UserService"
-	"userService/storage/postgres"
-
-	"github.com/jmoiron/sqlx"
+	"database/sql"
+	pb "user_service/genproto/user"
+	"user_service/storage/postgres"
 )
 
-type userService struct {
-	UserRepo *postgres.UserRepo
-	userPb.UnimplementedUserServiceServer
+type UserService struct {
+	pb.UnimplementedUserServer
+	Repo *postgres.UserRepo
 }
 
-func NewUserService(db *sqlx.DB) *userService {
-	return &userService{UserRepo: postgres.NewUserRepository(db)}
+func NewUserService(db *sql.DB) *UserService {
+	return &UserService{Repo: postgres.NewUserRepository(db)}
 }
