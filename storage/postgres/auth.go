@@ -6,7 +6,7 @@ import (
 	pb "user_service/genproto/authentication"
 )
 
-func (u *UserRepo) Register(ctx context.Context, user *pb.UserInfo) (*pb.ID, error) {
+func (u *UserRepo) Register(ctx context.Context, user *pb.UserDetails) (*pb.ID, error) {
 	var id pb.ID
 	query := `
 	insert into users (
@@ -87,7 +87,7 @@ func (u *UserRepo) DeleteRefreshToken(ctx context.Context, token string) error {
 		refresh_tokens
 	where
 		token = $1`
-	
+
 	_, err := u.DB.ExecContext(ctx, query, token)
 	return err
 }
