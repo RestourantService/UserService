@@ -14,3 +14,4 @@ type UserService struct {
 func NewUserService(db *sql.DB) *UserService {
 	return &UserService{Repo: postgres.NewUserRepository(db)}
 }
+

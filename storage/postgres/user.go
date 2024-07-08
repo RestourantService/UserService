@@ -80,21 +80,28 @@ func (r *UserRepo) DeleteUser(ctx context.Context, id string) error {
 }
 
 func (r *UserRepo) ValidateUser(ctx context.Context, id string) (*pb.Status, error) {
-	query := `SELECT id FROM users WHERE id=$1 AND deleted_at IS NULL`
+	query := `
+    select
+      case 
+        when id = $1 then true
+      else
+        false
+      end
+    from
+      users
+    where
+        id = $1 and deleted_at is null
+  `
 
-    row := r.DB.QueryRowContext(ctx, query, id)
-
-    err := row.Scan(&id)
-    if err!= nil {
-        if err == sql.ErrNoRows {
-            log.Println("User Not Found")
-            return &pb.Status{Successful: false}, sql.ErrNoRows
-        }
+	status := pb.Status{}
+    err := r.DB.QueryRowContext(ctx, query, id).Scan(&status.Successful)
+	if err!= nil {
         log.Println("Error Scanning User")
-        return &pb.Status{Successful: false}, err
+        return nil, err
     }
-
-    return &pb.Status{Successful: true}, nil
+	
+    return &status, nil
 }
+
 
 
