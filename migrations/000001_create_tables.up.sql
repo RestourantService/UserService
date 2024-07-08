@@ -6,7 +6,7 @@ CREATE TABLE users (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     deleted_at TIMESTAMP
-)
+);
 
 CREATE TABLE refresh_tokens (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid() not null,
