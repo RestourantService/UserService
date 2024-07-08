@@ -24,7 +24,7 @@ const _ = grpc.SupportPackageIsVersion7
 type RestaurantClient interface {
 	CreateRestaurant(ctx context.Context, in *RestaurantDetails, opts ...grpc.CallOption) (*ID, error)
 	GetRestaurantByID(ctx context.Context, in *ID, opts ...grpc.CallOption) (*RestaurantInfo, error)
-	UpdateRestaurant(ctx context.Context, in *ID, opts ...grpc.CallOption) (*Void, error)
+	UpdateRestaurant(ctx context.Context, in *RestaurantInfo, opts ...grpc.CallOption) (*Void, error)
 	DeleteRestaurant(ctx context.Context, in *ID, opts ...grpc.CallOption) (*Void, error)
 	FetchRestaurants(ctx context.Context, in *Pagination, opts ...grpc.CallOption) (*Restaurants, error)
 }
@@ -55,7 +55,7 @@ func (c *restaurantClient) GetRestaurantByID(ctx context.Context, in *ID, opts .
 	return out, nil
 }
 
-func (c *restaurantClient) UpdateRestaurant(ctx context.Context, in *ID, opts ...grpc.CallOption) (*Void, error) {
+func (c *restaurantClient) UpdateRestaurant(ctx context.Context, in *RestaurantInfo, opts ...grpc.CallOption) (*Void, error) {
 	out := new(Void)
 	err := c.cc.Invoke(ctx, "/restaurant.Restaurant/UpdateRestaurant", in, out, opts...)
 	if err != nil {
@@ -88,7 +88,7 @@ func (c *restaurantClient) FetchRestaurants(ctx context.Context, in *Pagination,
 type RestaurantServer interface {
 	CreateRestaurant(context.Context, *RestaurantDetails) (*ID, error)
 	GetRestaurantByID(context.Context, *ID) (*RestaurantInfo, error)
-	UpdateRestaurant(context.Context, *ID) (*Void, error)
+	UpdateRestaurant(context.Context, *RestaurantInfo) (*Void, error)
 	DeleteRestaurant(context.Context, *ID) (*Void, error)
 	FetchRestaurants(context.Context, *Pagination) (*Restaurants, error)
 	mustEmbedUnimplementedRestaurantServer()
@@ -104,7 +104,7 @@ func (UnimplementedRestaurantServer) CreateRestaurant(context.Context, *Restaura
 func (UnimplementedRestaurantServer) GetRestaurantByID(context.Context, *ID) (*RestaurantInfo, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetRestaurantByID not implemented")
 }
-func (UnimplementedRestaurantServer) UpdateRestaurant(context.Context, *ID) (*Void, error) {
+func (UnimplementedRestaurantServer) UpdateRestaurant(context.Context, *RestaurantInfo) (*Void, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateRestaurant not implemented")
 }
 func (UnimplementedRestaurantServer) DeleteRestaurant(context.Context, *ID) (*Void, error) {
@@ -163,7 +163,7 @@ func _Restaurant_GetRestaurantByID_Handler(srv interface{}, ctx context.Context,
 }
 
 func _Restaurant_UpdateRestaurant_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ID)
+	in := new(RestaurantInfo)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -175,7 +175,7 @@ func _Restaurant_UpdateRestaurant_Handler(srv interface{}, ctx context.Context, 
 		FullMethod: "/restaurant.Restaurant/UpdateRestaurant",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(RestaurantServer).UpdateRestaurant(ctx, req.(*ID))
+		return srv.(RestaurantServer).UpdateRestaurant(ctx, req.(*RestaurantInfo))
 	}
 	return interceptor(ctx, in, info, handler)
 }

@@ -24,7 +24,7 @@ const _ = grpc.SupportPackageIsVersion7
 type MenuClient interface {
 	AddMeal(ctx context.Context, in *MealDetails, opts ...grpc.CallOption) (*ID, error)
 	GetMealByID(ctx context.Context, in *ID, opts ...grpc.CallOption) (*MealInfo, error)
-	UpdateMeal(ctx context.Context, in *ID, opts ...grpc.CallOption) (*Void, error)
+	UpdateMeal(ctx context.Context, in *MealInfo, opts ...grpc.CallOption) (*Void, error)
 	DeleteMeal(ctx context.Context, in *ID, opts ...grpc.CallOption) (*Void, error)
 	FetchMeals(ctx context.Context, in *Filter, opts ...grpc.CallOption) (*Meals, error)
 }
@@ -55,7 +55,7 @@ func (c *menuClient) GetMealByID(ctx context.Context, in *ID, opts ...grpc.CallO
 	return out, nil
 }
 
-func (c *menuClient) UpdateMeal(ctx context.Context, in *ID, opts ...grpc.CallOption) (*Void, error) {
+func (c *menuClient) UpdateMeal(ctx context.Context, in *MealInfo, opts ...grpc.CallOption) (*Void, error) {
 	out := new(Void)
 	err := c.cc.Invoke(ctx, "/menu.Menu/UpdateMeal", in, out, opts...)
 	if err != nil {
@@ -88,7 +88,7 @@ func (c *menuClient) FetchMeals(ctx context.Context, in *Filter, opts ...grpc.Ca
 type MenuServer interface {
 	AddMeal(context.Context, *MealDetails) (*ID, error)
 	GetMealByID(context.Context, *ID) (*MealInfo, error)
-	UpdateMeal(context.Context, *ID) (*Void, error)
+	UpdateMeal(context.Context, *MealInfo) (*Void, error)
 	DeleteMeal(context.Context, *ID) (*Void, error)
 	FetchMeals(context.Context, *Filter) (*Meals, error)
 	mustEmbedUnimplementedMenuServer()
@@ -104,7 +104,7 @@ func (UnimplementedMenuServer) AddMeal(context.Context, *MealDetails) (*ID, erro
 func (UnimplementedMenuServer) GetMealByID(context.Context, *ID) (*MealInfo, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetMealByID not implemented")
 }
-func (UnimplementedMenuServer) UpdateMeal(context.Context, *ID) (*Void, error) {
+func (UnimplementedMenuServer) UpdateMeal(context.Context, *MealInfo) (*Void, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateMeal not implemented")
 }
 func (UnimplementedMenuServer) DeleteMeal(context.Context, *ID) (*Void, error) {
@@ -163,7 +163,7 @@ func _Menu_GetMealByID_Handler(srv interface{}, ctx context.Context, dec func(in
 }
 
 func _Menu_UpdateMeal_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ID)
+	in := new(MealInfo)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -175,7 +175,7 @@ func _Menu_UpdateMeal_Handler(srv interface{}, ctx context.Context, dec func(int
 		FullMethod: "/menu.Menu/UpdateMeal",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(MenuServer).UpdateMeal(ctx, req.(*ID))
+		return srv.(MenuServer).UpdateMeal(ctx, req.(*MealInfo))
 	}
 	return interceptor(ctx, in, info, handler)
 }

@@ -24,7 +24,7 @@ const _ = grpc.SupportPackageIsVersion7
 type PaymentClient interface {
 	MakePayment(ctx context.Context, in *PaymentDetails, opts ...grpc.CallOption) (*Status, error)
 	GetPayment(ctx context.Context, in *ID, opts ...grpc.CallOption) (*PaymentInfo, error)
-	UpdatePayment(ctx context.Context, in *ID, opts ...grpc.CallOption) (*Void, error)
+	UpdatePayment(ctx context.Context, in *PaymentInfo, opts ...grpc.CallOption) (*Void, error)
 }
 
 type paymentClient struct {
@@ -53,7 +53,7 @@ func (c *paymentClient) GetPayment(ctx context.Context, in *ID, opts ...grpc.Cal
 	return out, nil
 }
 
-func (c *paymentClient) UpdatePayment(ctx context.Context, in *ID, opts ...grpc.CallOption) (*Void, error) {
+func (c *paymentClient) UpdatePayment(ctx context.Context, in *PaymentInfo, opts ...grpc.CallOption) (*Void, error) {
 	out := new(Void)
 	err := c.cc.Invoke(ctx, "/payment.Payment/UpdatePayment", in, out, opts...)
 	if err != nil {
@@ -68,7 +68,7 @@ func (c *paymentClient) UpdatePayment(ctx context.Context, in *ID, opts ...grpc.
 type PaymentServer interface {
 	MakePayment(context.Context, *PaymentDetails) (*Status, error)
 	GetPayment(context.Context, *ID) (*PaymentInfo, error)
-	UpdatePayment(context.Context, *ID) (*Void, error)
+	UpdatePayment(context.Context, *PaymentInfo) (*Void, error)
 	mustEmbedUnimplementedPaymentServer()
 }
 
@@ -82,7 +82,7 @@ func (UnimplementedPaymentServer) MakePayment(context.Context, *PaymentDetails) 
 func (UnimplementedPaymentServer) GetPayment(context.Context, *ID) (*PaymentInfo, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetPayment not implemented")
 }
-func (UnimplementedPaymentServer) UpdatePayment(context.Context, *ID) (*Void, error) {
+func (UnimplementedPaymentServer) UpdatePayment(context.Context, *PaymentInfo) (*Void, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdatePayment not implemented")
 }
 func (UnimplementedPaymentServer) mustEmbedUnimplementedPaymentServer() {}
@@ -135,7 +135,7 @@ func _Payment_GetPayment_Handler(srv interface{}, ctx context.Context, dec func(
 }
 
 func _Payment_UpdatePayment_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ID)
+	in := new(PaymentInfo)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -147,7 +147,7 @@ func _Payment_UpdatePayment_Handler(srv interface{}, ctx context.Context, dec fu
 		FullMethod: "/payment.Payment/UpdatePayment",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(PaymentServer).UpdatePayment(ctx, req.(*ID))
+		return srv.(PaymentServer).UpdatePayment(ctx, req.(*PaymentInfo))
 	}
 	return interceptor(ctx, in, info, handler)
 }

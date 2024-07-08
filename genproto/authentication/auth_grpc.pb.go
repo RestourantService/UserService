@@ -22,7 +22,7 @@ const _ = grpc.SupportPackageIsVersion7
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type AuthenticationClient interface {
-	Register(ctx context.Context, in *UserInfo, opts ...grpc.CallOption) (*ID, error)
+	Register(ctx context.Context, in *UserDetails, opts ...grpc.CallOption) (*ID, error)
 	Login(ctx context.Context, in *LoginRequest, opts ...grpc.CallOption) (*ID, error)
 	Logout(ctx context.Context, in *LogoutRequest, opts ...grpc.CallOption) (*Void, error)
 	RefreshToken(ctx context.Context, in *TokenRequest, opts ...grpc.CallOption) (*Void, error)
@@ -36,7 +36,7 @@ func NewAuthenticationClient(cc grpc.ClientConnInterface) AuthenticationClient {
 	return &authenticationClient{cc}
 }
 
-func (c *authenticationClient) Register(ctx context.Context, in *UserInfo, opts ...grpc.CallOption) (*ID, error) {
+func (c *authenticationClient) Register(ctx context.Context, in *UserDetails, opts ...grpc.CallOption) (*ID, error) {
 	out := new(ID)
 	err := c.cc.Invoke(ctx, "/authentication.Authentication/Register", in, out, opts...)
 	if err != nil {
@@ -76,7 +76,7 @@ func (c *authenticationClient) RefreshToken(ctx context.Context, in *TokenReques
 // All implementations must embed UnimplementedAuthenticationServer
 // for forward compatibility
 type AuthenticationServer interface {
-	Register(context.Context, *UserInfo) (*ID, error)
+	Register(context.Context, *UserDetails) (*ID, error)
 	Login(context.Context, *LoginRequest) (*ID, error)
 	Logout(context.Context, *LogoutRequest) (*Void, error)
 	RefreshToken(context.Context, *TokenRequest) (*Void, error)
@@ -87,7 +87,7 @@ type AuthenticationServer interface {
 type UnimplementedAuthenticationServer struct {
 }
 
-func (UnimplementedAuthenticationServer) Register(context.Context, *UserInfo) (*ID, error) {
+func (UnimplementedAuthenticationServer) Register(context.Context, *UserDetails) (*ID, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method Register not implemented")
 }
 func (UnimplementedAuthenticationServer) Login(context.Context, *LoginRequest) (*ID, error) {
@@ -113,7 +113,7 @@ func RegisterAuthenticationServer(s grpc.ServiceRegistrar, srv AuthenticationSer
 }
 
 func _Authentication_Register_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(UserInfo)
+	in := new(UserDetails)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -125,7 +125,7 @@ func _Authentication_Register_Handler(srv interface{}, ctx context.Context, dec 
 		FullMethod: "/authentication.Authentication/Register",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(AuthenticationServer).Register(ctx, req.(*UserInfo))
+		return srv.(AuthenticationServer).Register(ctx, req.(*UserDetails))
 	}
 	return interceptor(ctx, in, info, handler)
 }

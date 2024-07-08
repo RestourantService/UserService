@@ -23,7 +23,7 @@ const _ = grpc.SupportPackageIsVersion7
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type UserClient interface {
 	GetUser(ctx context.Context, in *ID, opts ...grpc.CallOption) (*UserInfo, error)
-	UpdateUser(ctx context.Context, in *ID, opts ...grpc.CallOption) (*Void, error)
+	UpdateUser(ctx context.Context, in *UserInfo, opts ...grpc.CallOption) (*Void, error)
 	DeleteUser(ctx context.Context, in *ID, opts ...grpc.CallOption) (*Void, error)
 	ValidateUser(ctx context.Context, in *ID, opts ...grpc.CallOption) (*Status, error)
 }
@@ -45,7 +45,7 @@ func (c *userClient) GetUser(ctx context.Context, in *ID, opts ...grpc.CallOptio
 	return out, nil
 }
 
-func (c *userClient) UpdateUser(ctx context.Context, in *ID, opts ...grpc.CallOption) (*Void, error) {
+func (c *userClient) UpdateUser(ctx context.Context, in *UserInfo, opts ...grpc.CallOption) (*Void, error) {
 	out := new(Void)
 	err := c.cc.Invoke(ctx, "/user.User/UpdateUser", in, out, opts...)
 	if err != nil {
@@ -77,7 +77,7 @@ func (c *userClient) ValidateUser(ctx context.Context, in *ID, opts ...grpc.Call
 // for forward compatibility
 type UserServer interface {
 	GetUser(context.Context, *ID) (*UserInfo, error)
-	UpdateUser(context.Context, *ID) (*Void, error)
+	UpdateUser(context.Context, *UserInfo) (*Void, error)
 	DeleteUser(context.Context, *ID) (*Void, error)
 	ValidateUser(context.Context, *ID) (*Status, error)
 	mustEmbedUnimplementedUserServer()
@@ -90,7 +90,7 @@ type UnimplementedUserServer struct {
 func (UnimplementedUserServer) GetUser(context.Context, *ID) (*UserInfo, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetUser not implemented")
 }
-func (UnimplementedUserServer) UpdateUser(context.Context, *ID) (*Void, error) {
+func (UnimplementedUserServer) UpdateUser(context.Context, *UserInfo) (*Void, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method UpdateUser not implemented")
 }
 func (UnimplementedUserServer) DeleteUser(context.Context, *ID) (*Void, error) {
@@ -131,7 +131,7 @@ func _User_GetUser_Handler(srv interface{}, ctx context.Context, dec func(interf
 }
 
 func _User_UpdateUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ID)
+	in := new(UserInfo)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -143,7 +143,7 @@ func _User_UpdateUser_Handler(srv interface{}, ctx context.Context, dec func(int
 		FullMethod: "/user.User/UpdateUser",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(UserServer).UpdateUser(ctx, req.(*ID))
+		return srv.(UserServer).UpdateUser(ctx, req.(*UserInfo))
 	}
 	return interceptor(ctx, in, info, handler)
 }
