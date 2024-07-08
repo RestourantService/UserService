@@ -81,13 +81,13 @@ func (u *UserRepo) ValidateRefreshToken(ctx context.Context, token string) (stri
 	return userID, nil
 }
 
-func (u *UserRepo) DeleteRefreshToken(ctx context.Context, token string) error {
+func (u *UserRepo) DeleteRefreshToken(ctx context.Context, userID string) error {
 	query := `
 	delete from
 		refresh_tokens
 	where
-		token = $1`
+		user_id = $1`
 
-	_, err := u.DB.ExecContext(ctx, query, token)
+	_, err := u.DB.ExecContext(ctx, query, userID)
 	return err
 }
