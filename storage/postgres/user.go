@@ -1,9 +1,8 @@
 package postgres
 
 import (
-	"database/sql"
-
 	"context"
+	"database/sql"
 	"log"
 	"time"
 	pb "user_service/genproto/user"
