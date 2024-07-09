@@ -54,6 +54,10 @@ func (u *UserRepo) StoreRefreshToken(ctx context.Context, token *pb.TokenRequest
 	)`
 
 	_, err := u.DB.ExecContext(ctx, query)
+	if err != nil {
+		return err
+	}
+	_, err = u.DB.Exec(query, token.UserId, token.Token, token.ExpiresAt)
 	return err
 }
 
@@ -73,11 +77,9 @@ func (u *UserRepo) ValidateRefreshToken(ctx context.Context, token string) (stri
 	if err != nil {
 		return "", err
 	}
-
 	if time.Now().After(time.Unix(expiresAt, 0)) {
 		return "", err
 	}
-
 	return userID, nil
 }
 

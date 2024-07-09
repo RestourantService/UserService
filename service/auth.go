@@ -21,5 +21,17 @@ func (S *UserService) Login(ctx context.Context, req *pb.LoginRequest) (*pb.ID, 
 	return &pb.ID{Id: checker.Id}, nil
 }
 func (S *UserService) Logout(ctx context.Context, req *pb.LogoutRequest) (*pb.Void, error) {
+	checker, err := S.Repo.GetUserByUsername(ctx, req.Username)
+	if err != nil {
+		return nil, err
+	}
+	err = S.Repo.DeleteRefreshToken(ctx, checker.Id)
+	if err != nil {
+		return nil, err
+	}
+	return &pb.Void{}, nil
+}
 
+func (S *UserService) RefreshToken(ctx context.Context, req *pb.TokenRequest) (*pb.Void, error) {
+	return &pb.Void{}, S.Repo.StoreRefreshToken(ctx, req)
 }
