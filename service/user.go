@@ -5,6 +5,8 @@ import (
 	"database/sql"
 	pb "user_service/genproto/user"
 	"user_service/storage/postgres"
+
+	"github.com/pkg/errors"
 )
 
 type UserService struct {
@@ -17,17 +19,37 @@ func NewUserService(db *sql.DB) *UserService {
 }
 
 func (s *UserService) GetUser(ctx context.Context, req *pb.ID) (*pb.UserInfo, error) {
-	return s.Repo.GetUserByID(ctx, req.Id)
+	resp, err := s.Repo.GetUserByID(ctx, req.Id)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to read user")
+	}
+
+	return resp, nil
 }
 
 func (s *UserService) UpdateUser(ctx context.Context, req *pb.UserInfo) (*pb.Void, error) {
-	return &pb.Void{}, s.Repo.UpdateUser(ctx, req)
+	err := s.Repo.UpdateUser(ctx, req)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to update user")
+	}
+
+	return &pb.Void{}, nil
 }
 
 func (s *UserService) DeleteUser(ctx context.Context, req *pb.ID) (*pb.Void, error) {
-	return &pb.Void{}, s.Repo.DeleteUser(ctx, req.Id)
+	err := s.Repo.DeleteUser(ctx, req.Id)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to delete user")
+	}
+
+	return &pb.Void{}, nil
 }
 
 func (s *UserService) ValidateUser(ctx context.Context, req *pb.ID) (*pb.Status, error) {
-	return s.Repo.ValidateUser(ctx, req.Id)
+	resp, err := s.Repo.ValidateUser(ctx, req.Id)
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to validate user")
+	}
+
+	return resp, nil
 }
