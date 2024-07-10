@@ -102,12 +102,12 @@ func (r *UserRepo) ValidateUser(ctx context.Context, id string) (*pb.Status, err
         id = $1 and deleted_at is null
   `
 
-	status := pb.Status{}
-	err := r.DB.QueryRowContext(ctx, query, id).Scan(&status.Successful)
+	var status bool
+	err := r.DB.QueryRowContext(ctx, query, id).Scan(&status)
 	if err != nil {
 		log.Println("failed to scan user")
 		return nil, err
 	}
 
-	return &status, nil
+	return &pb.Status{Successful: status}, nil
 }
