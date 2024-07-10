@@ -77,7 +77,7 @@ func (r *UserRepo) DeleteUser(ctx context.Context, id string) error {
 	SET
 		deleted_at=NOW() 
 	WHERE
-		id=$1`
+		deleted_at is null and id=$1`
 
 	_, err := r.DB.ExecContext(ctx, query, id)
 	if err != nil {
