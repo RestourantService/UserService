@@ -51,11 +51,14 @@ func (h Handler) RefreshToken(c *gin.Context) {
 		return
 	}
 	res, err := h.Auth.CheckRefreshToken(c, &pb.CheckRefreshTokenRequest{Token: RefreshtokenStr})
-	if !res.Acces {
-		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Refresh token is invalid"})
-	}
 	if err != nil {
 		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 	}
-	c.JSON(http.StatusOK, res.Accestoken)
+	if !res.Acces {
+		c.AbortWithStatusJSON(http.StatusUnauthorized, gin.H{"error": "Refresh token is invalid"})
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"accestoken": res.Accestoken,
+	})
 }

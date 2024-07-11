@@ -61,7 +61,7 @@ func (S *AuthService) Login(ctx context.Context, req *pb.LoginRequest) (*pb.Logi
 	return res, nil
 }
 
-func (S *AuthService) Refresh(ctx context.Context, req *pb.CheckRefreshTokenRequest) (*pb.CheckRefreshTokenResponse, error) {
+func (S *AuthService) CheckRefreshToken(ctx context.Context, req *pb.CheckRefreshTokenRequest) (*pb.CheckRefreshTokenResponse, error) {
 	_, err := auth.ValidateRefreshToken(req.Token)
 	if err != nil {
 		log.Print(err)
