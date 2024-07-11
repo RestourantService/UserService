@@ -2,7 +2,6 @@ package postgres
 
 import (
 	"context"
-	"time"
 	pb "user_service/genproto/authentication"
 )
 
@@ -44,47 +43,26 @@ func (u *UserRepo) GetUserByUsername(ctx context.Context, username string) (*pb.
 	return &user, nil
 }
 
-// func (u *UserRepo) StoreRefreshToken(ctx context.Context, token *pb.TokenRequest) error {
-// 	query := `
-// 	insert into refresh_tokens (
-// 		user_id, token, expires_at
-// 	)
-// 	values (
-// 		$1, $2, $3
-// 	)`
-
-// 	_, err := u.DB.ExecContext(ctx, query)
-// 	if err != nil {
-// 		return err
-// 	}
-// 	_, err = u.DB.Exec(query, token.UserId, token.Token, token.ExpiresAt)
-// 	return err
-// }
-
-func (u *UserRepo) ValidateRefreshToken(ctx context.Context, token string) (string, error) {
+func (u *UserRepo) StoreRefreshToken(ctx context.Context, token *pb.LoginResponse) error {
 	query := `
-	select
-		user_id, expires_at
-	from
-		refresh_tokens
-	where
-		token = $1
-	`
+	insert into refresh_tokens (
+		user_id, token
+	)
+	values (
+		$1, $2
+	)`
 
-	var userID string
-	var expiresAt int64
-	err := u.DB.QueryRowContext(ctx, query, token).Scan(&userID, &expiresAt)
+	_, err := u.DB.ExecContext(ctx, query)
 	if err != nil {
-		return "", err
+		return err
 	}
-	if time.Now().After(time.Unix(expiresAt, 0)) {
-		return "", err
-	}
-	return userID, nil
+	_, err = u.DB.Exec(query, token.Refresh.Userid, token.Refresh.Refreshtoken)
+	return err
 }
 
 func (u *UserRepo) DeleteRefreshToken(ctx context.Context, userID string) error {
 	query := `
+	if exists
 	delete from
 		refresh_tokens
 	where
