@@ -18,7 +18,7 @@ func main() {
 	log.Fatal(router.Run(":8085"))
 }
 func Newhandler() *handler.Handler {
-	conn, err := grpc.Dial("localhost:50051", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	conn, err := grpc.NewClient("localhost:50051", grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		panic(err)
 	}
