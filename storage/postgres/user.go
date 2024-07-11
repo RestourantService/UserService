@@ -4,7 +4,6 @@ import (
 	"context"
 	"database/sql"
 	"log"
-	"time"
 	pb "user_service/genproto/user"
 )
 
@@ -46,11 +45,11 @@ func (r *UserRepo) UpdateUser(ctx context.Context, user *pb.UserInfo) error {
 	UPDATE 
 		users
 	SET
-		username=$1, email=$2, password=$3, updated_at=$4
+		username=$1, email=$2, password=$3, updated_at=NOW()
 	WHERE
-		id=$5 AND deleted_at IS NULL`
+		id=$4 AND deleted_at IS NULL`
 
-	result, err := r.DB.ExecContext(ctx, query, user.Username, user.Email, user.Password, time.Now(), user.Id)
+	result, err := r.DB.ExecContext(ctx, query, user.Username, user.Email, user.Password, user.Id)
 	if err != nil {
 		log.Println("failed to update user")
 		return err
