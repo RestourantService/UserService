@@ -26,15 +26,18 @@ func (h Handler) Register(c *gin.Context) {
 func (h Handler) Login(c *gin.Context) {
 	req := pb.LoginRequest{}
 	if err := c.BindJSON(&req); err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		c.JSON(http.StatusBadRequest, gin.H{"error1": err.Error()})
 	}
 	res, err := h.Auth.Login(c, &req)
 	if err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		c.JSON(http.StatusUnauthorized, gin.H{"error2": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusOK, res)
+	c.JSON(http.StatusOK, gin.H{
+		"access_token":  res.Access.Accesstoken,
+		"refresh_token": res.Refresh.Refreshtoken,
+	})
 
 }
 
