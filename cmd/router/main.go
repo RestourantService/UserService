@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"user_service/api"
 	"user_service/api/handler"
@@ -13,10 +14,11 @@ import (
 func main() {
 	hand := Newhandler()
 	router := api.Router(hand)
-	log.Fatal(router.Run("8085"))
+	fmt.Println("ok")
+	log.Fatal(router.Run(":8085"))
 }
 func Newhandler() *handler.Handler {
-	conn, err := grpc.Dial(":50051", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	conn, err := grpc.Dial("localhost:50051", grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		panic(err)
 	}

@@ -52,11 +52,7 @@ func (u *UserRepo) StoreRefreshToken(ctx context.Context, token *pb.LoginRespons
 		$1, $2
 	)`
 
-	_, err := u.DB.ExecContext(ctx, query)
-	if err != nil {
-		return err
-	}
-	_, err = u.DB.Exec(query, token.Refresh.Userid, token.Refresh.Refreshtoken)
+	_, err := u.DB.Exec(query, token.Refresh.Userid, token.Refresh.Refreshtoken)
 	return err
 }
 
