@@ -11,10 +11,7 @@ CREATE TABLE users (
 CREATE TABLE refresh_tokens (
     id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
     user_id uuid REFERENCES users(id) not null,
-    token text UNIQUE not null,
-    expires_at bigint not null,
-    created_at TIMESTAMP default CURRENT_TIMESTAMP not null,
-    revoked boolean DEFAULT false
+    token text UNIQUE not null
 );
 
 CREATE INDEX idx_refresh_tokens_user_id ON refresh_tokens(user_id);

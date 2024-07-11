@@ -3,6 +3,8 @@ package service
 import (
 	"context"
 	"errors"
+	"log"
+	"user_service/api/auth"
 	pb "user_service/genproto/authentication"
 )
 
@@ -10,28 +12,71 @@ func (S *UserService) Register(ctx context.Context, req *pb.UserDetails) (*pb.ID
 	return S.Repo.Register(ctx, req)
 }
 
-func (S *UserService) Login(ctx context.Context, req *pb.LoginRequest) (*pb.ID, error) {
+func (S *UserService) Login(ctx context.Context, req *pb.LoginRequest) (*pb.LoginResponse, error) {
 	checker, err := S.Repo.GetUserByUsername(ctx, req.Username)
 	if err != nil {
 		return nil, err
 	}
+
 	if req.Password != checker.Password {
 		return nil, errors.New("username or password error")
 	}
-	return &pb.ID{Id: checker.Id}, nil
-}
-func (S *UserService) Logout(ctx context.Context, req *pb.LogoutRequest) (*pb.Void, error) {
-	checker, err := S.Repo.GetUserByUsername(ctx, req.Username)
+
+	res := &pb.LoginResponse{
+		Access: &pb.AccessToken{
+			Id:       checker.Id,
+			Username: checker.Username,
+			Email:    checker.Email,
+		},
+		Refresh: &pb.RefreshToken{
+			Userid: checker.Id,
+		},
+	}
+	err = auth.GeneratedRefreshJWTToken(res)
 	if err != nil {
+		log.Print(err)
 		return nil, err
 	}
-	err = S.Repo.DeleteRefreshToken(ctx, checker.Id)
+	err = auth.GeneratedAccessJWTToken(res)
 	if err != nil {
+		log.Print(err)
 		return nil, err
 	}
-	return &pb.Void{}, nil
+	err = S.Repo.StoreRefreshToken(ctx, res)
+	if err != nil {
+		log.Print(err)
+		return nil, err
+	}
+	return res, nil
 }
 
-func (S *UserService) RefreshToken(ctx context.Context, req *pb.TokenRequest) (*pb.Void, error) {
-	return &pb.Void{}, S.Repo.StoreRefreshToken(ctx, req)
+func (S *UserService) Refresh(ctx context.Context, req *pb.CheckRefreshTokenRequest) (*pb.CheckRefreshTokenResponse, error) {
+	_, err := auth.ValidateRefreshToken(req.Token)
+	if err != nil {
+		log.Print(err)
+		return &pb.CheckRefreshTokenResponse{Acces: false}, err
+	}
+	id, err := auth.GetUserIdFromRefreshToken(req.Token)
+	if err != nil {
+		log.Print(err)
+		return nil, err
+	}
+	info, err := S.Repo.GetUserByID(ctx, id)
+	if err != nil {
+		log.Print(err)
+		return nil, err
+	}
+	res := pb.LoginResponse{
+		Access: &pb.AccessToken{
+			Id:       info.Id,
+			Username: info.Username,
+			Email:    info.Email,
+		},
+	}
+	err = auth.GeneratedAccessJWTToken(&res)
+	if err != nil {
+		log.Print(err)
+		return nil, err
+	}
+
 }
