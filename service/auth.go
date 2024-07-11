@@ -2,17 +2,28 @@ package service
 
 import (
 	"context"
+	"database/sql"
 	"errors"
 	"log"
 	"user_service/api/auth"
 	pb "user_service/genproto/authentication"
+	"user_service/storage/postgres"
 )
 
-func (S *UserService) Register(ctx context.Context, req *pb.UserDetails) (*pb.ID, error) {
+type AuthService struct {
+	pb.UnimplementedAuthenticationServer
+	Repo *postgres.UserRepo
+}
+
+func NewAuthService(db *sql.DB) *AuthService {
+	return &AuthService{Repo: postgres.NewUserRepository(db)}
+}
+
+func (S *AuthService) Register(ctx context.Context, req *pb.UserDetails) (*pb.ID, error) {
 	return S.Repo.Register(ctx, req)
 }
 
-func (S *UserService) Login(ctx context.Context, req *pb.LoginRequest) (*pb.LoginResponse, error) {
+func (S *AuthService) Login(ctx context.Context, req *pb.LoginRequest) (*pb.LoginResponse, error) {
 	checker, err := S.Repo.GetUserByUsername(ctx, req.Username)
 	if err != nil {
 		return nil, err
@@ -50,7 +61,7 @@ func (S *UserService) Login(ctx context.Context, req *pb.LoginRequest) (*pb.Logi
 	return res, nil
 }
 
-func (S *UserService) Refresh(ctx context.Context, req *pb.CheckRefreshTokenRequest) (*pb.CheckRefreshTokenResponse, error) {
+func (S *AuthService) CheckRefreshToken(ctx context.Context, req *pb.CheckRefreshTokenRequest) (*pb.CheckRefreshTokenResponse, error) {
 	_, err := auth.ValidateRefreshToken(req.Token)
 	if err != nil {
 		log.Print(err)
