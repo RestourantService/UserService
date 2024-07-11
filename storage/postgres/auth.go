@@ -44,22 +44,22 @@ func (u *UserRepo) GetUserByUsername(ctx context.Context, username string) (*pb.
 	return &user, nil
 }
 
-func (u *UserRepo) StoreRefreshToken(ctx context.Context, token *pb.TokenRequest) error {
-	query := `
-	insert into refresh_tokens (
-		user_id, token, expires_at
-	)
-	values (
-		$1, $2, $3
-	)`
+// func (u *UserRepo) StoreRefreshToken(ctx context.Context, token *pb.TokenRequest) error {
+// 	query := `
+// 	insert into refresh_tokens (
+// 		user_id, token, expires_at
+// 	)
+// 	values (
+// 		$1, $2, $3
+// 	)`
 
-	_, err := u.DB.ExecContext(ctx, query)
-	if err != nil {
-		return err
-	}
-	_, err = u.DB.Exec(query, token.UserId, token.Token, token.ExpiresAt)
-	return err
-}
+// 	_, err := u.DB.ExecContext(ctx, query)
+// 	if err != nil {
+// 		return err
+// 	}
+// 	_, err = u.DB.Exec(query, token.UserId, token.Token, token.ExpiresAt)
+// 	return err
+// }
 
 func (u *UserRepo) ValidateRefreshToken(ctx context.Context, token string) (string, error) {
 	query := `
