@@ -6,7 +6,7 @@ import (
 	"log/slog"
 	pbr "user_service/genproto/reservation"
 	pb "user_service/genproto/user"
-	l "user_service/pkg/logger"
+	"user_service/pkg/logger"
 	"user_service/storage/postgres"
 
 	"github.com/pkg/errors"
@@ -15,21 +15,20 @@ import (
 type UserService struct {
 	pb.UnimplementedUserServer
 	Repo              *postgres.UserRepo
-	Log               *slog.Logger
 	ReservationClient pbr.ReservationClient
-	Logger *slog.Logger
+	Logger            *slog.Logger
 }
 
 func NewUserService(db *sql.DB, reser pbr.ReservationClient) *UserService {
 	return &UserService{
 		Repo:              postgres.NewUserRepository(db),
-		Log:               l.NewLogger(),
 		ReservationClient: reser,
+		Logger:            logger.NewLogger(),
 	}
 }
 
 func (u *UserService) GetUser(ctx context.Context, req *pb.ID) (*pb.UserInfo, error) {
-	u.Log.Info("Get user Method is starting")
+	u.Logger.Info("Get user Method is starting")
 
 	resp, err := u.Repo.GetUserByID(ctx, req.Id)
 	if err != nil {
@@ -38,12 +37,12 @@ func (u *UserService) GetUser(ctx context.Context, req *pb.ID) (*pb.UserInfo, er
 
 	}
 
-	u.Log.Info("GetUser has successfully finished")
+	u.Logger.Info("GetUser has successfully finished")
 	return resp, nil
 }
 
 func (u *UserService) UpdateUser(ctx context.Context, req *pb.UserInfo) (*pb.Void, error) {
-	u.Log.Info("Update user Method is starting")
+	u.Logger.Info("Update user Method is starting")
 
 	err := u.Repo.UpdateUser(ctx, req)
 	if err != nil {
@@ -51,12 +50,12 @@ func (u *UserService) UpdateUser(ctx context.Context, req *pb.UserInfo) (*pb.Voi
 		return nil, errors.Wrap(err, "failed to update user")
 	}
 
-	u.Log.Info("UpdateUser has successfully finished")
+	u.Logger.Info("UpdateUser has successfully finished")
 	return &pb.Void{}, nil
 }
 
 func (u *UserService) DeleteUser(ctx context.Context, req *pb.ID) (*pb.Void, error) {
-	u.Log.Info("Delete user Method is starting")
+	u.Logger.Info("Delete user Method is starting")
 
 	err := u.Repo.DeleteUser(ctx, req.Id)
 	if err != nil {
@@ -71,7 +70,7 @@ func (u *UserService) DeleteUser(ctx context.Context, req *pb.ID) (*pb.Void, err
 	}
 
 	if !status.Successful {
-		u.Logger.Error("Deletion of user reservations unsuccessful")
+		u.Logger.Error("deletion of user reservations unsuccessful")
 		return nil, errors.New("deletion of user reservations unsuccessful")
 	}
 
@@ -80,13 +79,14 @@ func (u *UserService) DeleteUser(ctx context.Context, req *pb.ID) (*pb.Void, err
 }
 
 func (u *UserService) ValidateUser(ctx context.Context, req *pb.ID) (*pb.Status, error) {
-	u.Log.Info("Validate user Method is starting")
+	u.Logger.Info("Validate user Method is starting")
+
 	resp, err := u.Repo.ValidateUser(ctx, req.Id)
 	if err != nil {
 		u.Logger.Error(errors.Wrap(err, "failed to validate user").Error())
 		return nil, errors.Wrap(err, "failed to validate user")
 	}
 
-	u.Log.Info("ValidateUser has successfully finished")
+	u.Logger.Info("ValidateUser has successfully finished")
 	return resp, nil
 }
