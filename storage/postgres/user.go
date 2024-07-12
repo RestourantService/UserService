@@ -49,13 +49,13 @@ func (r *UserRepo) UpdateUser(ctx context.Context, user *pb.UserInfo) error {
 	WHERE
 		id=$4 AND deleted_at IS NULL`
 
-	result, err := r.DB.ExecContext(ctx, query, user.Username, user.Email, user.Password, user.Id)
+	res, err := r.DB.ExecContext(ctx, query, user.Username, user.Email, user.Password, user.Id)
 	if err != nil {
 		log.Println("failed to update user")
 		return err
 	}
 
-	count, err := result.RowsAffected()
+	count, err := res.RowsAffected()
 	if err != nil {
 		log.Println("failed to check rows affected")
 		return err
@@ -78,10 +78,21 @@ func (r *UserRepo) DeleteUser(ctx context.Context, id string) error {
 	WHERE
 		deleted_at is null and id=$1`
 
-	_, err := r.DB.ExecContext(ctx, query, id)
+	res, err := r.DB.ExecContext(ctx, query, id)
 	if err != nil {
 		log.Println("failed to delete user")
 		return err
+	}
+
+	rowAff, err := res.RowsAffected()
+	if err != nil {
+		log.Println("failed to get rows affected")
+		return err
+	}
+
+	if rowAff < 1 {
+		log.Println("user already deleted or not found")
+		return sql.ErrNoRows
 	}
 
 	return nil

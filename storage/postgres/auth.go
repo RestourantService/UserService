@@ -58,7 +58,6 @@ func (u *UserRepo) StoreRefreshToken(ctx context.Context, token *pb.LoginRespons
 
 func (u *UserRepo) DeleteRefreshToken(ctx context.Context, userID string) error {
 	query := `
-	if exists
 	delete from
 		refresh_tokens
 	where
