@@ -3,12 +3,13 @@ package service
 import (
 	"context"
 	"database/sql"
-	"github.com/pkg/errors"
 	"log/slog"
 	"user_service/api/auth"
 	pb "user_service/genproto/authentication"
 	l "user_service/pkg/logger"
 	"user_service/storage/postgres"
+
+	"github.com/pkg/errors"
 )
 
 type AuthService struct {
@@ -18,7 +19,10 @@ type AuthService struct {
 }
 
 func NewAuthService(db *sql.DB) *AuthService {
-	return &AuthService{Repo: postgres.NewUserRepository(db), Log: l.NewLogger()}
+	return &AuthService{
+		Repo: postgres.NewUserRepository(db),
+		Log:  l.NewLogger(),
+	}
 }
 
 func (S *AuthService) Register(ctx context.Context, req *pb.UserDetails) (*pb.ID, error) {
@@ -78,6 +82,7 @@ func (S *AuthService) Login(ctx context.Context, req *pb.LoginRequest) (*pb.Logi
 
 func (S *AuthService) CheckRefreshToken(ctx context.Context, req *pb.CheckRefreshTokenRequest) (*pb.CheckRefreshTokenResponse, error) {
 	S.Log.Info("CheckRefreshToken service is working")
+	
 	_, err := auth.ValidateRefreshToken(req.Token)
 	if err != nil {
 		S.Log.Error("refresh tokin is invalid", err)

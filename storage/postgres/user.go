@@ -3,8 +3,8 @@ package postgres
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"log"
-	"time"
 	pb "user_service/genproto/user"
 )
 
@@ -46,17 +46,17 @@ func (r *UserRepo) UpdateUser(ctx context.Context, user *pb.UserInfo) error {
 	UPDATE 
 		users
 	SET
-		username=$1, email=$2, password=$3, updated_at=$4
+		username=$1, email=$2, password=$3, updated_at=NOW()
 	WHERE
-		id=$5 AND deleted_at IS NULL`
+		id=$4 AND deleted_at IS NULL`
 
-	result, err := r.DB.ExecContext(ctx, query, user.Username, user.Email, user.Password, time.Now(), user.Id)
+	res, err := r.DB.ExecContext(ctx, query, user.Username, user.Email, user.Password, user.Id)
 	if err != nil {
 		log.Println("failed to update user")
 		return err
 	}
 
-	count, err := result.RowsAffected()
+	count, err := res.RowsAffected()
 	if err != nil {
 		log.Println("failed to check rows affected")
 		return err
@@ -79,35 +79,43 @@ func (r *UserRepo) DeleteUser(ctx context.Context, id string) error {
 	WHERE
 		deleted_at is null and id=$1`
 
-	_, err := r.DB.ExecContext(ctx, query, id)
+	res, err := r.DB.ExecContext(ctx, query, id)
 	if err != nil {
 		log.Println("failed to delete user")
 		return err
 	}
 
+	rowAff, err := res.RowsAffected()
+	if err != nil {
+		log.Println("failed to get rows affected")
+		return err
+	}
+
+	if rowAff < 1 {
+		log.Println("user already deleted or not found")
+		return sql.ErrNoRows
+	}
+
 	return nil
 }
 
-func (r *UserRepo) ValidateUser(ctx context.Context, id string) (*pb.Status, error) {
+func (r *UserRepo) ValidateUser(ctx context.Context, id string) (bool, error) {
 	query := `
-    select
-      	case 
-        	when id = $1 then true
-      	else
-        	false
-      	end
-    from
-      	users
-    where
-        id = $1 and deleted_at is null
-  `
+    select EXISTS (
+		select 1
+		from users
+		where id = $1 AND deleted_at IS NULL
+	)`
 
 	var status bool
 	err := r.DB.QueryRowContext(ctx, query, id).Scan(&status)
 	if err != nil {
 		log.Println("failed to scan user")
-		return nil, err
+		return false, err
+	}
+	if !status {
+		return false, errors.New("not found")
 	}
 
-	return &pb.Status{Successful: status}, nil
+	return status, nil
 }

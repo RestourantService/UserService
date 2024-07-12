@@ -1,5 +1,5 @@
 Makefile
 .env
 vendor
+.log
 .idea
-app.log

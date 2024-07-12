@@ -25,7 +25,7 @@ func GeneratedRefreshJWTToken(req *pb.LoginResponse) error {
 		log.Println(err)
 		return err
 	}
-
+	
 	req.Refresh.Refreshtoken = newToken
 	return nil
 }

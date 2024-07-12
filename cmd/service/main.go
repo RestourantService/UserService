@@ -7,6 +7,7 @@ import (
 	"user_service/config"
 	pb1 "user_service/genproto/authentication"
 	pb "user_service/genproto/user"
+	"user_service/pkg"
 
 	"user_service/service"
 	"user_service/storage/postgres"
@@ -30,7 +31,8 @@ func main() {
 	}
 	defer lis.Close()
 
-	userService := service.NewUserService(db)
+	reserClient := pkg.CreateReservationClient(*cfg)
+	userService := service.NewUserService(db, reserClient)
 	authService := service.NewAuthService(db)
 	server := grpc.NewServer()
 	pb.RegisterUserServer(server, userService)
