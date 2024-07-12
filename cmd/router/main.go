@@ -1,11 +1,11 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"user_service/api"
 	"user_service/api/handler"
 	"user_service/genproto/authentication"
+	l "user_service/pkg/logger"
 
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -14,15 +14,15 @@ import (
 func main() {
 	hand := Newhandler()
 	router := api.Router(hand)
-	fmt.Println("ok")
+	log.Println("server is running")
 	log.Fatal(router.Run(":8085"))
 }
 func Newhandler() *handler.Handler {
 	conn, err := grpc.Dial("localhost:50051", grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
-		panic(err)
+		log.Panic(err)
 	}
 	authservice := authentication.NewAuthenticationClient(conn)
-
-	return &handler.Handler{Auth: authservice}
+	loggers := l.NewLogger()
+	return &handler.Handler{Auth: authservice, Log: loggers}
 }

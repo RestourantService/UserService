@@ -3,7 +3,9 @@ package service
 import (
 	"context"
 	"database/sql"
+	"log/slog"
 	pb "user_service/genproto/user"
+	l "user_service/pkg/logger"
 	"user_service/storage/postgres"
 
 	"github.com/pkg/errors"
@@ -12,10 +14,11 @@ import (
 type UserService struct {
 	pb.UnimplementedUserServer
 	Repo *postgres.UserRepo
+	Log  *slog.Logger
 }
 
 func NewUserService(db *sql.DB) *UserService {
-	return &UserService{Repo: postgres.NewUserRepository(db)}
+	return &UserService{Repo: postgres.NewUserRepository(db), Log: l.NewLogger()}
 }
 
 func (u *UserService) GetUser(ctx context.Context, req *pb.ID) (*pb.UserInfo, error) {
