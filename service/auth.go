@@ -82,6 +82,7 @@ func (S *AuthService) Login(ctx context.Context, req *pb.LoginRequest) (*pb.Logi
 
 func (S *AuthService) CheckRefreshToken(ctx context.Context, req *pb.CheckRefreshTokenRequest) (*pb.CheckRefreshTokenResponse, error) {
 	S.Log.Info("CheckRefreshToken service is working")
+	
 	_, err := auth.ValidateRefreshToken(req.Token)
 	if err != nil {
 		S.Log.Error("refresh tokin is invalid", err)
