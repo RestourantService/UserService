@@ -3,7 +3,10 @@ package service
 import (
 	"context"
 	"database/sql"
+	"log/slog"
+	pbr "user_service/genproto/reservation"
 	pb "user_service/genproto/user"
+	l "user_service/pkg/logger"
 	"user_service/storage/postgres"
 
 	"github.com/pkg/errors"
@@ -11,11 +14,17 @@ import (
 
 type UserService struct {
 	pb.UnimplementedUserServer
-	Repo *postgres.UserRepo
+	Repo              *postgres.UserRepo
+	Log               *slog.Logger
+	ReservationClient pbr.ReservationClient
 }
 
-func NewUserService(db *sql.DB) *UserService {
-	return &UserService{Repo: postgres.NewUserRepository(db)}
+func NewUserService(db *sql.DB, reser pbr.ReservationClient) *UserService {
+	return &UserService{
+		Repo:              postgres.NewUserRepository(db),
+		Log:               l.NewLogger(),
+		ReservationClient: reser,
+	}
 }
 
 func (u *UserService) GetUser(ctx context.Context, req *pb.ID) (*pb.UserInfo, error) {
@@ -40,6 +49,15 @@ func (u *UserService) DeleteUser(ctx context.Context, req *pb.ID) (*pb.Void, err
 	err := u.Repo.DeleteUser(ctx, req.Id)
 	if err != nil {
 		return nil, errors.Wrap(err, "failed to delete user")
+	}
+
+	status, err := u.ReservationClient.DeleteReservationByUserID(ctx, &pbr.ID{Id: req.Id})
+	if err != nil {
+		return nil, errors.Wrap(err, "failed to delete user reservations")
+	}
+
+	if !status.Successful {
+		return nil, errors.New("deletion of user reservations unsuccessful")
 	}
 
 	return &pb.Void{}, nil
