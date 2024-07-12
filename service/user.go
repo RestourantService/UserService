@@ -84,9 +84,9 @@ func (u *UserService) ValidateUser(ctx context.Context, req *pb.ID) (*pb.Status,
 	resp, err := u.Repo.ValidateUser(ctx, req.Id)
 	if err != nil {
 		u.Logger.Error(errors.Wrap(err, "failed to validate user").Error())
-		return nil, errors.Wrap(err, "failed to validate user")
+		return &pb.Status{Successful: false}, errors.Wrap(err, "failed to validate user")
 	}
 
 	u.Logger.Info("ValidateUser has successfully finished")
-	return resp, nil
+	return &pb.Status{Successful: resp}, nil
 }

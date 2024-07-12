@@ -3,6 +3,7 @@ package postgres
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"log"
 	pb "user_service/genproto/user"
 )
@@ -98,7 +99,7 @@ func (r *UserRepo) DeleteUser(ctx context.Context, id string) error {
 	return nil
 }
 
-func (r *UserRepo) ValidateUser(ctx context.Context, id string) (*pb.Status, error) {
+func (r *UserRepo) ValidateUser(ctx context.Context, id string) (bool, error) {
 	query := `
     select EXISTS (
 		select 1
@@ -110,8 +111,11 @@ func (r *UserRepo) ValidateUser(ctx context.Context, id string) (*pb.Status, err
 	err := r.DB.QueryRowContext(ctx, query, id).Scan(&status)
 	if err != nil {
 		log.Println("failed to scan user")
-		return nil, err
+		return false, err
+	}
+	if !status {
+		return false, errors.New("not found")
 	}
 
-	return &pb.Status{Successful: status}, nil
+	return status, nil
 }
